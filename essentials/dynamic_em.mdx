@@ -26,7 +26,7 @@ which stores the vector(or "state") in memory.
 
 When the underlying data changes, we can auto-update the embeddings using the `update()` method to change the state of your vectors.
 
-**NOTE:** This method does not delete or erase your previous embeddings(more on state fallbacks in [VersionControlWrapper](https://google.com)).
+**NOTE:** This method does not delete or erase your previous embeddings(more on state fallbacks in [VersionControlWrapper](https://docs.incribo.com/essentials/version_control)).
   
 This component does not perform any computations on the embeddings itself - **instead**, it acts as a container that facilitates the storage and updating of embedding vectors. 
 <br />The actual computation of new embeddings would typically be done externally, and then the results can be stored in this wrapper.
