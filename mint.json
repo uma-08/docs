@@ -42,9 +42,14 @@
   ],
   "anchors": [
     {
-      "name": "Documentation",
+      "name": "Docs",
       "icon": "book-open-cover",
       "url": "quickstart"
+    },
+    {
+      "name": "Docs",
+      "icon": "book-open-cover",
+      "url": "https://www.google.com"
     },
     {
       "name": "Community",
