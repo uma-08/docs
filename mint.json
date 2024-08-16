@@ -5,98 +5,91 @@
     "dark": "/logo/3.svg",
     "light": "/logo/3.svg"
   },
-  "favicon": "/favicon.svg",
+  "favicon": "/logo/3.svg",
   "colors": {
-    "primary": "#fff",
-    "light": "#00ffd0",
-    "dark": "#fff",
+    "primary": "#000",
+    "light": "#00A8E8",
+    "dark": "#000",
     "anchors": {
       "from": "#fff",
-      "to": "#fff"
+      "to": "#000"
     }
   },
   "topbarLinks": [
     {
       "name": "Community",
-      "url": "mailto:info@incribo.com"
+      "url": "mailto"
     },
     {
-      "name": "Support",
+      "name": "Contact",
       "url": "mailto:info@incribo.com"
     }
   ],
   "topbarCtaButton": {
     "name": "Github",
-    "url": "https://dashboard.mintlify.com"
+    "url": "https://github.com/incribo-inc/incribo"
   },
   "tabs": [
-    {
-      "name": "API Reference",
-      "url": "api-reference"
-    },
-    {
-      "name": "Examples",
-      "url": "examples"
-    },
-    {
-      "name": "Blog",
-      "url": "blog"
-    },
+    
     {
       "name": "Bugs/Feedback",
-      "url": "feedback"
+      "url": "https://airtable.com/app2ELkXmrgQqjGH2/pagcWmqbvlUt5F6sz/form"
+    },
+    {
+      "name": "Talk to a founder",
+      "url": "https://cal.com/uma08/30min"
     }
   ],
   "anchors": [
     {
       "name": "Documentation",
       "icon": "book-open-cover",
-      "url": "https://mintlify.com/docs"
+      "url": "quickstart"
     },
     {
       "name": "Community",
-      "icon": "slack",
-      "url": "https://mintlify.com/community"
-    },
-    {
-      "name": "Blog",
-      "icon": "newspaper",
-      "url": "https://mintlify.com/blog"
+      "icon": "discord",
+      "url": "https://incribo.com/community"
     }
   ],
   "navigation": [
     {
       "group": "Start Here",
-      "pages": ["introduction", "quickstart"]
-    },
-    {
-      "group": "Incribo",
-      "pages": [
-        "essentials/markdown", 
-        "essentials/code", 
-        "essentials/images", 
-        "essentials/settings", 
-        "essentials/navigation", 
-        "essentials/leakage",
-        "essentials/guardrails"]
-    }, 
-    {
-      "group": "API Documentation",
-      "pages": ["api-reference/introduction"]
-    },
-    {
-      "group": "Endpoint Examples",
-      "pages": [
-        "api-reference/endpoint/get",
-        "api-reference/endpoint/create",
-        "api-reference/endpoint/delete"
+      "pages": [ 
+        "quickstart",
+        {
+          "group": "Examples",
+          "pages": [
+            "examples/multi",
+            "examples/credit",
+            "examples/protein",
+            "examples/rag"
+          ]
+      }
       ]
+      
+    },
+    {
+      "group": "Components",
+      "pages": [
+        "essentials/branch_manager", 
+        "essentials/consistency_manager", 
+        "essentials/drift_manager", 
+        "essentials/dynamic_em", 
+        "essentials/emb_compare", 
+        "essentials/emb_streamer", 
+        "essentials/embedding", 
+        "essentials/eval_weights", 
+        "essentials/history_tracker", 
+        "essentials/update_counter", 
+        "essentials/version_control"
+       ]
     }
   ],
   "footerSocials": {
-    "twitter": "https://twitter.com/mintlify",
-    "github": "https://github.com/mintlify",
-    "linkedin": "https://www.linkedin.com/company/mintsearch"
+    "twitter": "https://x.com/IncriboOfficial",
+    "github": "https://github.com/incribo-inc/incribo",
+    "linkedin": "https://www.linkedin.com/company/incribo/"
   }
 }
 
