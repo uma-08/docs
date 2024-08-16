@@ -3,15 +3,16 @@
   "name": "Incribo",
   "logo": {
     "dark": "/logo/3.svg",
-    "light": "/logo/3.svg"
+    "light": "/logo/3.svg",
+    "href": "/"
   },
   "favicon": "/logo/3.svg",
   "colors": {
-    "primary": "#000",
+    "primary": "#00A8E8",
     "light": "#00A8E8",
-    "dark": "#000",
+    "dark": "#00A8E8",
     "anchors": {
-      "from": "#fff",
+      "from": "#000",
       "to": "#000"
     }
   },
@@ -41,11 +42,6 @@
     }
   ],
   "anchors": [
-    {
-      "name": "Docs",
-      "icon": "book-open-cover",
-      "url": "quickstart"
-    },
     {
       "name": "Documentation",
       "icon": "book-open-cover",
