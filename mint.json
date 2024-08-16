@@ -1,10 +1,13 @@
 {
   "$schema": "https://mintlify.com/schema.json",
   "name": "Incribo",
+  "primaryTab": {
+    "name": "Documentation"
+},
   "logo": {
     "dark": "/logo/3.svg",
     "light": "/logo/3.svg",
-    "href": "/"
+    "href": "https://www.incribo.com/"
   },
   "favicon": "/logo/3.svg",
   "colors": {
