@@ -1,0 +1,40 @@
+---
+title: 'Embedding Streamer'
+description: '`EmbeddingStreamer` is designed to handle streaming data from various sources (like local files or databases), convert this data into embeddings on-the-fly, and manage these embeddings dynamically.'
+---
+Usage:
+```python embedding.py
+import numpy as np
+from incribo import EmbeddingStreamer
+
+# Define a simple embedding function (in practice, this would be more complex)
+def simple_embedding(text):
+    return np.array([len(text)], dtype=np.float32)
+
+# Create a new EmbeddingStreamer
+streamer = EmbeddingStreamer(simple_embedding)
+
+# Stream from a local file
+streamer.stream_local_file("path/to/your/file.txt")
+
+# Stream from a database
+streamer.stream_database("postgresql://username:password@localhost/dbname", "SELECT text FROM documents")
+
+# Update an embedding
+streamer.update_embedding("doc1", "New document text", 0.1)
+
+# Retrieve an embedding
+embedding = streamer.get_embedding("doc1")
+if embedding:
+    print(f"Embedding for doc1: {embedding}")
+else:
+    print("No embedding found for doc1")
+```
+`EmbeddingStreamer` handles the complexities of data streaming, embedding creation, and storage, allowing you to focus on defining the embedding function and using the results. 
+<br />It's particularly useful for scenarios where data is constantly changing or arriving in real-time, and you need to maintain up-to-date embeddings.
+
+**tl;dr** of `EmbeddingStreamer` :
+
+ - Processing large datasets that don't fit in memory,
+ - Creating embeddings from continuously updating data sources,
+ - Implementing online learning systems where embeddings are updated as new data arrives.

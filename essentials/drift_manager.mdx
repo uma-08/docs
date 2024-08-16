@@ -1,0 +1,38 @@
+---
+title: 'Drift Manager'
+description: '`DriftManagerWrapper` helps to monitor and detect significant changes **(drift)** in embedding vectors over time, with the ability to compare current embeddings to an original reference embedding.'
+---
+
+An example usage would be:
+```python drift_manager.py
+from incribo import DriftManagerWrapper
+
+# Create a new drift manager with an initial vector and threshold
+drift_manager = DriftManagerWrapper([1.0, 2.0, 3.0], 0.5)
+
+# Check drift with a similar vector (should return False)
+slight_change = drift_manager.check_drift([1.1, 2.1, 3.1])
+print(f"Slight change causes drift: {slight_change}")  # Output: False
+
+# Check drift with a more different vector (might return True)
+big_change = drift_manager.check_drift([2.0, 3.0, 4.0])
+print(f"Big change causes drift: {big_change}")  # Output: True
+
+# Update the drift threshold
+drift_manager.update_threshold(1.0)
+
+# Check drift again with the new threshold
+big_change_new_threshold = drift_manager.check_drift([2.0, 3.0, 4.0])
+print(f"Big change causes drift with new threshold: {big_change_new_threshold}")  # Output: False
+
+# Get the original vector
+original = drift_manager.get_original_vector()
+print(f"Original vector: {original}")  # Output: [1.0, 2.0, 3.0]
+```
+The `check_drift()` method calculates the **Euclidean distance** between the current vector and the reference vector.
+
+**tl;dr** of `DriftManagerWrapper`:
+
+- Detecting when a model's predictions are starting to deviate significantly from its initial state, <br />
+- Identifying when retraining might be necessary due to data distribution shifts, <br />
+- Monitoring the stability of embeddings in a production environment.

@@ -1,0 +1,39 @@
+---
+title: 'Update Counter'
+description: '`UpdateCounterWrapper` is designed to keep track of the number of updates or changes that have occurred to your embeddings.'
+---
+
+
+To use this:
+```python update_counter.py
+from incribo import UpdateCounterWrapper
+
+# Create a new update counter
+counter = UpdateCounterWrapper()
+
+# Check the initial count
+initial_count = counter.get_count()
+print(f"Initial count: {initial_count}")  # Output: Initial count: 0
+
+# Increment the counter a few times
+for _ in range(5):
+    counter.increment()
+
+# Check the updated count
+updated_count = counter.get_count()
+print(f"Updated count: {updated_count}")  # Output: Updated count: 5
+
+# Increment more and check again
+counter.increment()
+counter.increment()
+final_count = counter.get_count()
+print(f"Final count: {final_count}")  # Output: Final count: 7
+```
+This component is useful in scenarios where you need to keep a track of the times something has been modified or updated. 
+
+Some potential use cases include:<br/>
+- Tracking the number of times an embedding has been updated, or <br />
+- Counting the number of iterations in an algorithm, or <br />
+- Monitoring the frequency of certain events or operations.
+
+`UpdateCounterWrapper` does not have an upper limit, and will continue tracking update counts as long as needed with the underlying data changes.

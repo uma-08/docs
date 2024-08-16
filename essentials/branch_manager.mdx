@@ -1,0 +1,51 @@
+---
+title: 'Branch Manager'
+description: '`BranchManagerWrapper` is designed to help you manage multiple branches of embedding vectors, allowing for the creation of new branches, switching between branches, or merging them.'
+---
+
+Use it like:
+```python branch_manager.py
+from incribo import BranchManagerWrapper
+
+# Create a new branch manager
+bm = BranchManagerWrapper([1.0, 2.0, 3.0])
+
+print(f"Initial vector: {bm.get_active_vector()}")
+print(f"Initial branch count: {bm.get_branch_count()}")
+
+# Create a new branch
+new_branch = bm.create_branch([4.0, 5.0, 6.0])
+print(f"New branch index: {new_branch}")
+print(f"Active vector after new branch: {bm.get_active_vector()}")
+
+# Switch back to the main branch
+bm.switch_branch(0)
+print(f"Active vector after switch: {bm.get_active_vector()}")
+
+# Create another branch
+bm.create_branch([7.0, 8.0, 9.0])
+
+# Merge the two new branches
+bm.merge_branches(1, 2)
+print(f"Active vector after merge: {bm.get_active_vector()}")
+print(f"Total branches: {bm.get_branch_count()}")
+
+# Try to switch to a non-existent branch
+try:
+    bm.switch_branch(10)
+except ValueError as e:
+    print(f"Error switching branch: {e}")
+```
+`BranchManagerWrapper` maintains a memory-based list of all branches, allowing for efficient storage and retrieval of any branch. <br />
+The merging functionality provides a simple way to combine different branches, 
+though in practice you might want to combine this component with a more sophisticated merging strategy depending on your specific use case.
+
+**tl;dr** of `BranchManagerWrapper`:
+
+- Experimenting with different variations of an embedding vector
+- Maintaining separate embeddings for different contexts or tasks
+- Implementing a collaborative system where different users can work on various branches
+- Design a **multi-agent system** based off various branches
+
+**Note** that the `switch_branch()` and `merge_branches()` methods return **PyResults**, 
+which means they can potentially raise exceptions if you try to access non-existent branches.

@@ -1,0 +1,164 @@
+---
+title: 'Multi-Agents AI System  '
+description: 'In this example, let us build a simple multi-agent system where each agent is represented by a branch in the BranchManagerWrapper. The agents will collaboratively work on a task, occasionally merging their progress.'
+---
+
+<Steps>
+<Step title="Install the dependencies ">
+   ```python 
+   pipx install incribo numpy typing
+```
+</Step>
+
+
+<Step title="Install the dependencies ">
+   ```python multi_agents.py
+from incribo import BranchManagerWrapper, EmbeddingStreamer, EmbeddingComparator, Embedding, ConsistencyManagerWrapper
+import numpy as np
+from typing import List, Dict
+import random
+```
+</Step>
+
+
+<Step title="Install the dependencies ">
+   ```python multi_agents.py
+# Add some product details
+products = {
+    1: {"name": "Laptop", "category": "Electronics", "price": 999, "tags": ["computer", "work", "portable"]},
+    2: {"name": "Smartphone", "category": "Electronics", "price": 699, "tags": ["mobile", "communication"]},
+    3: {"name": "Running Shoes", "category": "Sports", "price": 89, "tags": ["fitness", "outdoor"]},
+    4: {"name": "Coffee Maker", "category": "Home", "price": 49, "tags": ["kitchen", "appliance"]},
+    5: {"name": "Novel", "category": "Books", "price": 15, "tags": ["fiction", "entertainment"]}
+}
+
+# Simulate user behavior
+user_behaviors = {
+    "view": [1, 2, 1, 3, 2, 4],
+    "purchase": [1],
+    "cart": [2, 4],
+    "search": ["laptop", "phone", "coffee"]
+}
+```
+</Step>
+
+
+<Step title="Initialize the embedding and agent functions ">
+   ```python 
+# Embedding function
+def product_embedding(product: Dict) -> np.ndarray:
+    # Simple embedding: [price, len(tags), category_hash, name_length]
+    return np.array([
+        product['price'] / 1000,  # Normalize price
+        len(product['tags']),
+        hash(product['category']) % 10,
+        len(product['name'])
+    ], dtype=np.float32)
+
+# Initialize our components
+branch_manager = BranchManagerWrapper(np.zeros(4).tolist())  # 4-dimensional embedding
+streamer = EmbeddingStreamer(product_embedding)
+comparator = EmbeddingComparator(None)
+consistency_manager = ConsistencyManagerWrapper(np.zeros(4).tolist())
+
+# Agent functions
+def view_history_agent(behaviors: Dict[str, List]) -> np.ndarray:
+    viewed_products = [products[pid] for pid in behaviors['view']]
+    return np.mean([product_embedding(p) for p in viewed_products], axis=0)
+
+def purchase_history_agent(behaviors: Dict[str, List]) -> np.ndarray:
+    purchased_products = [products[pid] for pid in behaviors['purchase']]
+    return np.mean([product_embedding(p) for p in purchased_products], axis=0) if purchased_products else np.zeros(4)
+
+def cart_analysis_agent(behaviors: Dict[str, List]) -> np.ndarray:
+    cart_products = [products[pid] for pid in behaviors['cart']]
+    return np.mean([product_embedding(p) for p in cart_products], axis=0) if cart_products else np.zeros(4)
+
+def search_intent_agent(behaviors: Dict[str, List]) -> np.ndarray:
+    # Simplified: just use the length of search terms as a feature
+    return np.array([0, 0, 0, np.mean([len(term) for term in behaviors['search']])], dtype=np.float32)
+```
+</Step>
+
+<Step title="Create branches">
+   ```python multi_agents.py
+# Create branches for each agent
+view_branch = branch_manager.create_branch
+    (view_history_agent(user_behaviors).tolist())
+
+purchase_branch = branch_manager.create_branch
+    (purchase_history_agent(user_behaviors).tolist())
+
+cart_branch = branch_manager.create_branch
+    (cart_analysis_agent(user_behaviors).tolist())
+
+search_branch = branch_manager.create_branch
+    (search_intent_agent(user_behaviors).tolist())
+```
+</Step>
+
+
+<Step title="Simulate recommendation process">
+   ```python multi_agents.py
+# Simulate recommendation process
+for day in range(5):  # Simulate 5 days of recommendations
+    print(f"\nDay {day + 1} Recommendations:")
+    
+    # Update user behaviors (insert data from actual user interactions)
+    user_behaviors['view'].append(random.choice(list(products.keys())))
+    if random.random() > 0.8:  # 20% chance of purchase
+        user_behaviors['purchase'].append(random.choice(user_behaviors['view'][-3:]))
+    
+    if random.random() > 0.7:  # 30% chance of adding to cart
+        user_behaviors['cart'].append(random.choice(list(products.keys())))
+    user_behaviors['search'].append(random.choice(['book', 'electronics', 'sports', 'kitchen']))
+
+    # Agents work and update their branches
+    branch_manager.switch_branch(view_branch)
+    branch_manager.commit(view_history_agent(user_behaviors).tolist())
+    
+    branch_manager.switch_branch(purchase_branch)
+    branch_manager.commit(purchase_history_agent(user_behaviors).tolist())
+    
+    branch_manager.switch_branch(cart_branch)
+    branch_manager.commit(cart_analysis_agent(user_behaviors).tolist())
+    
+    branch_manager.switch_branch(search_branch)
+    branch_manager.commit(search_intent_agent(user_behaviors).tolist())
+
+# Merge insights from view and purchase history
+    merged_view_purchase = branch_manager.merge_branches(view_branch, purchase_branch)
+    
+    # Compare merged insights with cart analysis
+    comparator.add_embedding(Embedding(branch_manager.get_active_vector(), "ViewPurchase"))
+    branch_manager.switch_branch(cart_branch)
+    comparator.add_embedding(Embedding(branch_manager.get_active_vector(), "Cart"))
+    
+    best_insight = comparator.get_best_model()
+    print(f"Best insight source: {best_insight}")
+
+    # Use the best insight to generate recommendations
+    if best_insight == "ViewPurchase":
+        branch_manager.switch_branch(merged_view_purchase)
+    else:
+        branch_manager.switch_branch(cart_branch)
+    
+    recommendation_vector = branch_manager.get_active_vector()
+    
+    # Find the most similar product to recommend
+    similarities = {pid: np.dot(product_embedding(p), recommendation_vector) 
+                    for pid, p in products.items()}
+    recommended_product = max(similarities, key=similarities.get)
+    
+    print(f"Recommended product: {products[recommended_product]['name']}")
+
+    # Update the consistent state with the latest recommendation
+    consistency_manager.update(recommendation_vector)
+
+    # Final state
+print("\nFinal Recommendation State:")
+print(f"Consistent recommendation vector: {consistency_manager.get_vector()}")
+```
+</Step>
+</Steps>
+

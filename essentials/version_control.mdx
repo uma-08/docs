@@ -1,0 +1,50 @@
+---
+title: 'Version Control'
+description: '`VersionControlWrapper` lets you manage multiple versions of an embedding vector, allowing for commits of new versions and rollbacks to previous versions.'
+---
+
+
+Use it like:
+```python version_control.py
+from incribo import VersionControlWrapper
+
+# Create a new version control wrapper
+vc = VersionControlWrapper([1.0, 2.0, 3.0])
+
+# Check initial state
+print(f"Initial vector: {vc.get_current_vector()}")
+print(f"Initial version: {vc.get_current_version()}")
+
+# Commit a new version
+new_version = vc.commit([4.0, 5.0, 6.0])
+print(f"New version after commit: {new_version}")
+print(f"Current vector: {vc.get_current_vector()}")
+
+# Commit another version
+vc.commit([7.0, 8.0, 9.0])
+
+# Check the number of versions
+print(f"Total versions: {vc.get_version_count()}")
+
+# Rollback to the first version
+vc.rollback(0) #add the version number you wish to rollback to
+print(f"Vector after rollback: {vc.get_current_vector()}")
+print(f"Current version after rollback: {vc.get_current_version()}")
+
+# Try to rollback to a non-existent version
+try:
+    vc.rollback(10)
+except ValueError as e:
+    print(f"Error rolling back: {e}")
+```
+
+`VersionControlWrapper` maintains an internal list of all committed versions, allowing for efficient storage and retrieval of any version. 
+The rollback functionality allows you to easily switch between different versions of the embedding.
+
+**tl;dr** of `VersionControlWrapper`:
+
+- Tracking the evolution of an embedding vector over time,
+- Allowing **experimentation** with different versions of an embedding,
+- Implementing an **undo/redo** functionality for embedding modifications.
+
+**Note** that the `rollback()` method returns a **PyResult**, which means it can potentially raise an exception if you try to rollback to a non-existent version. 

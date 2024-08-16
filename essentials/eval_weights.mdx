@@ -1,0 +1,41 @@
+---
+title: 'Evaluation Weights'
+description: '`EvaluationWeights` component allows fine-grained control over how embeddings are compared in the EmbeddingComparator.'
+---
+
+Example usage would look like:
+```python evaluate_weights.py
+from incribo import EvaluationWeights
+
+# Create a new EvaluationWeights object
+weights = EvaluationWeights(0.3, 0.4, 0.2, 0.1)
+
+# Print the current weights
+print(f"L2 Norm Weight: {weights.l2_norm_weight}")
+print(f"Cosine Similarity Weight: {weights.cosine_similarity_weight}")
+print(f"Sparsity Weight: {weights.sparsity_weight}")
+print(f"Dimensionality Weight: {weights.dimensionality_weight}")
+
+# Update a weight
+weights.set_l2_norm_weight(0.35)
+
+# Print the updated weight
+print(f"Updated L2 Norm Weight: {weights.l2_norm_weight}")
+
+# Attempt to set invalid weights (sum > 1.0)
+try:
+    weights.set_cosine_similarity_weight(0.7)
+except ValueError as e:
+    print(f"Error: {e}")
+
+# Print the entire weights object
+print(weights)
+```
+`EvaluationWeights` component ensures that you can easily adjust the different metrics in embedding comparison while maintaining a valid weighting scheme
+(sum of weights = 1.0). This flexibility allows for more nuanced and task-specific evaluations of embedding quality.
+
+**tl;dr** of `EvaluationWeights`:
+
+- Customizing the embedding comparison process for specific use cases,
+- Experimenting with different weighting schemes to find the most effective evaluation strategy,
+- Prioritizing certain embedding characteristics (e.g., sparsity) over others based on application requirements.

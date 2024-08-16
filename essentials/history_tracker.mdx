@@ -1,0 +1,34 @@
+---
+title: 'History Tracker'
+description: '`HistoryTrackerWrapper` is designed to keep track of historical records, typically used for tracking changes in embeddings or other values over time. '
+---
+
+An example usage would be:
+```python history_tracker.py
+from incribo import HistoryTrackerWrapper
+
+# Create a new history tracker with a maximum of 1000 records
+tracker = HistoryTrackerWrapper(1000)
+
+# Let's add some records
+tracker.add_record(1.0, 0.5)
+tracker.add_record(2.0, 0.7)
+tracker.add_record(3.0, 0.6)
+
+# Getting the history
+history = tracker.get_history()
+print(history)  # Output: [(1.0, 0.5), (2.0, 0.7), (3.0, 0.6)]
+
+# Add more records than the maximum
+for i in range(1001):
+    tracker.add_record(float(i), i / 1000.0)
+
+# Get the history again
+history = tracker.get_history()
+print(len(history))  # Output: 1000
+print(history[0])  # Output: (1.0, 0.001)  # The oldest record after overflow
+print(history[-1])  # Output: (1000.0, 1.0)  # The newest record
+```
+This component is useful in scenarios where you need to **track changes over time**, such as monitoring 
+the evolution of embedding values, tracking performance metrics, or maintaining a rolling window of recent data. 
+The fixed-size history ensures that memory usage remains constant even as you continue to add new records.

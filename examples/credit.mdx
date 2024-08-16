@@ -1,0 +1,271 @@
+---
+title: 'Credit Scoring '
+description: 'Lets explore a Credit scoring model that focuses on enhancing the accuracy, adaptability, and interpretability of the credit model.'
+---
+
+<Steps>
+<Step title="Install the dependencies ">
+   ```python 
+   pipx install incribo numpy scikit-learn
+```
+</Step>
+
+
+<Step title="Import all dependencies "> 
+    ```python credit_scoring.py
+from incribo import EmbeddingStreamer, EmbeddingComparator, Embedding
+import numpy as np
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+
+```
+</Step>
+
+
+<Step title="Add your credit data and create embeddings">
+    ```python credit_scoring.py
+# Add your function to load the credit data
+credit_data = load_credit_data()
+
+# Create embeddings for credit features
+def create_credit_embedding(features):
+
+# Normalize and combine features into an embedding
+return np.array(features, dtype=np.float32) / np.linalg.norm(features)
+
+streamer = EmbeddingStreamer(create_credit_embedding)
+
+# Create embeddings for all historical data
+for i, data in enumerate(credit_data):
+    streamer.update_embedding(f"credit_{i}", data['features'], 1.0)
+```
+</Step>
+
+
+<Step title="Train your model">
+  ```python credit_scoring.py
+
+# Split data into train and test sets
+X = [streamer.get_embedding(f"credit_{i}")['vector'] for i in range(len(credit_data))]
+y = [data['credit_score'] for data in credit_data]
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Train initial model
+model = RandomForestClassifier(n_estimators=100, random_state=42)
+model.fit(X_train, y_train)
+
+# Evaluate model
+y_pred = model.predict(X_test)
+accuracy = accuracy_score(y_test, y_pred)
+precision = precision_score(y_test, y_pred, average='weighted')
+recall = recall_score(y_test, y_pred, average='weighted')
+f1 = f1_score(y_test, y_pred, average='weighted')
+
+print(f"Initial Model Metrics:")
+print(f"Accuracy: {accuracy:.4f}")
+print(f"Precision: {precision:.4f}")
+print(f"Recall: {recall:.4f}")
+print(f"F1 Score: {f1:.4f}")
+```
+</Step>
+
+
+<Step title="Compare embeddings">
+```python credit_scoring.py
+# Compare embeddings to identify most influential features
+comparator = EmbeddingComparator(None)
+for i in range(len(X_train)):
+    comparator.add_embedding(Embedding(X_train[i], f"credit_{i}"))
+
+comparison_results = comparator.compare()
+print("\nMost similar credit profiles:")
+print(comparison_results)
+```
+</Step>
+
+
+<Step title="Continous model updates">
+```python credit_scoring.py
+from incribo import DynamicEmbeddingWrapper, DriftManagerWrapper
+import time
+
+# Initialize dynamic embedding and drift manager for the model
+model_embedding = DynamicEmbeddingWrapper(model.feature_importances_)
+drift_manager = DriftManagerWrapper(model.feature_importances_, drift_threshold=0.1)
+
+def update_model(new_data):
+    global model, model_embedding, drift_manager
+    
+    # Create embedding for new data
+    new_embedding = create_credit_embedding(new_data['features'])
+    
+    # Check for drift
+    if drift_manager.check_drift(new_embedding):
+        print("Significant drift detected. Retraining model...")
+        
+        # Add new data to training set
+        X_train.append(new_embedding)
+        y_train.append(new_data['credit_score'])
+        
+        # Retrain model
+        model.fit(X_train, y_train)
+        
+        # Update model embedding and drift manager
+        model_embedding.update(model.feature_importances_)
+        drift_manager = DriftManagerWrapper(model.feature_importances_, drift_threshold=0.1)
+    else:
+        # Incremental update (simplified for illustration)
+        model.n_estimators += 1
+        new_tree = RandomForestClassifier(n_estimators=1, random_state=int(time.time()))
+        new_tree.fit([new_embedding], [new_data['credit_score']])
+        model.estimators_.append(new_tree.estimators_[0])
+        
+        # Update model embedding
+        model_embedding.update(model.feature_importances_)
+
+# Simulate streaming new credit data
+new_credit_data = simulate_new_credit_data(100)  # Assume this function exists
+for new_data in new_credit_data:
+    update_model(new_data)
+    
+    # Periodically evaluate model
+    if new_credit_data.index(new_data) % 10 == 0:
+        y_pred = model.predict(X_test)
+        accuracy = accuracy_score(y_test, y_pred)
+        print(f"Updated Model Accuracy: {accuracy:.4f}")
+```
+</Step>
+
+
+<Step title="Version Control & Model Comparison">
+```python credit_scoring.py
+from incribo import VersionControlWrapper
+
+# Initialize version control
+version_control = VersionControlWrapper(model.feature_importances_)
+
+def create_model_checkpoint():
+    global model, version_control
+    
+    # Create a checkpoint of the current model
+    version_control.commit(model.feature_importances_)
+    print(f"Created model checkpoint. Total versions: {version_control.get_version_count()}")
+
+# Create checkpoints periodically or based on performance improvements
+create_model_checkpoint()
+
+# Compare different versions
+def compare_model_versions(version1, version2):
+    global X_test, y_test
+    
+    # Rollback to version1
+    version_control.rollback(version1)
+    model1_features = version_control.get_current_vector()
+    model1 = RandomForestClassifier(n_estimators=100, random_state=42)
+    model1.fit(X_train, y_train)
+    model1.feature_importances_ = model1_features
+    
+    # Rollback to version2
+    version_control.rollback(version2)
+    model2_features = version_control.get_current_vector()
+    model2 = RandomForestClassifier(n_estimators=100, random_state=42)
+    model2.fit(X_train, y_train)
+    model2.feature_importances_ = model2_features
+    
+    # Compare performance
+    y_pred1 = model1.predict(X_test)
+    y_pred2 = model2.predict(X_test)
+    
+    accuracy1 = accuracy_score(y_test, y_pred1)
+    accuracy2 = accuracy_score(y_test, y_pred2)
+    
+    print(f"Model Version {version1} Accuracy: {accuracy1:.4f}")
+    print(f"Model Version {version2} Accuracy: {accuracy2:.4f}")
+
+# Compare the initial model with the latest version
+compare_model_versions(0, version_control.get_version_count() - 1)
+```
+</Step>
+
+
+<Step title="Monitoring model health">
+```python credit_scoring.py
+from incribo import HistoryTrackerWrapper
+
+# Initialize history tracker
+performance_tracker = HistoryTrackerWrapper(1000)  # Track last 1000 performance records
+
+def track_model_performance():
+    global model, X_test, y_test, performance_tracker
+    
+    y_pred = model.predict(X_test)
+    accuracy = accuracy_score(y_test, y_pred)
+    performance_tracker.add_record(time.time(), accuracy)
+    
+    # Analyze performance trend
+    history = performance_tracker.get_history()
+    if len(history) > 10:  # Wait until we have enough data
+        recent_performance = [record[1] for record in history[-10:]]
+        if sum(recent_performance) / 10 < 0.7:  # If average performance drops below 0.7
+            print("Warning: Model performance is deteriorating. Consider retraining or reverting to a previous version.")
+
+# Track performance regularly
+track_model_performance()
+```
+</Step>
+
+
+<Step title="Multiple Credit Scoring scenarios">
+```python credit_scoring.py
+from incribo import BranchManagerWrapper
+
+# Initialize branch manager
+branch_manager = BranchManagerWrapper(model.feature_importances_)
+
+def create_model_branch(scenario_name, scenario_data):
+    global model, branch_manager
+    
+    # Train a new model for the specific scenario
+    scenario_X = [create_credit_embedding(data['features']) for data in scenario_data]
+    scenario_y = [data['credit_score'] for data in scenario_data]
+    
+    scenario_model = RandomForestClassifier(n_estimators=100, random_state=42)
+    scenario_model.fit(scenario_X, scenario_y)
+    
+    # Create a new branch for this scenario
+    branch_index = branch_manager.create_branch(scenario_model.feature_importances_)
+    print(f"Created new branch for scenario '{scenario_name}' with index {branch_index}")
+
+# Create branches for different scenarios
+create_model_branch("high_income", high_income_data)
+create_model_branch("first_time_borrowers", first_time_borrower_data)
+create_model_branch("small_business", small_business_data)
+
+def predict_credit_score(applicant_data, scenario):
+    global model, branch_manager
+    
+    # Switch to the appropriate branch
+    if scenario == "default":
+        branch_manager.switch_branch(0)  # Main branch
+    elif scenario == "high_income":
+        branch_manager.switch_branch(1)
+    elif scenario == "first_time_borrowers":
+        branch_manager.switch_branch(2)
+    elif scenario == "small_business":
+        branch_manager.switch_branch(3)
+    
+    # Use the selected model for prediction
+    model.feature_importances_ = branch_manager.get_active_vector()
+    applicant_embedding = create_credit_embedding(applicant_data['features'])
+    return model.predict([applicant_embedding])[0]
+
+# Example usage
+applicant = get_applicant_data()  # Assume this function exists
+credit_score = predict_credit_score(applicant, "small_business")
+print(f"Predicted credit score: {credit_score}")
+```
+</Step>
+
+
+</Steps>

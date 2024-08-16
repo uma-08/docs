@@ -1,0 +1,32 @@
+---
+title: 'Dynamic Embeddings'
+description: '`DynamicEmbeddingWrapper` is designed to handle dynamic data with your embeddings that can be updated over time.'
+---
+Let's look at an example of how this could be used:
+```python dynamic_embeddings.py
+from incribo import DynamicEmbeddingWrapper
+
+# Create or add your existing embeddings
+emb = DynamicEmbeddingWrapper([0.4140090346336365, 0.7410697340965271,  
+0.9770076274871826, 0.04037611931562424, 0.1512177288532257])
+
+# Get the current vector
+current_vector = emb.get_vector()
+print(current_vector)  # Output: [0.414009034, 0.7410...]
+
+# Update the embedding
+emb.update([4.0, 5.0, 6.0])
+
+# Get the updated vector
+updated_vector = emb.get_vector()
+print(updated_vector)  # Output: [4.0, 5.0, 6.0]
+```
+In the example above, we perform function calls of creating a new embedding using `DynamicEmbeddingWrapper`
+which stores the vector(or "state") in memory.
+
+When the underlying data changes, we can auto-update the embeddings using the `update()` method to change the state of your vectors.
+
+**NOTE:** This method does not delete or erase your previous embeddings(more on state fallbacks in [VersionControlWrapper](https://google.com)).
+  
+This component does not perform any computations on the embeddings itself - **instead**, it acts as a container that facilitates the storage and updating of embedding vectors. 
+<br />The actual computation of new embeddings would typically be done externally, and then the results can be stored in this wrapper.

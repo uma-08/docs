@@ -1,0 +1,51 @@
+---
+title: 'Consistency Manager'
+description: '`ConsistencyManagerWrapper` is designed to manage consistent access to an embedding vector across multiple threads or processes, ensuring that updates are atomic and providing versioning.'
+---
+
+An example usage would be:
+```python consistency_manager.py
+from incribo import ConsistencyManagerWrapper
+import threading
+
+# Create a new consistency manager
+manager = ConsistencyManagerWrapper([1.0, 2.0, 3.0])
+
+# Function to update the vector in a thread
+def update_vector():
+    global manager
+    new_version = manager.update([4.0, 5.0, 6.0])
+    print(f"Updated to version: {new_version}")
+
+# Function to read the vector in a thread
+def read_vector():
+    global manager
+    vector = manager.get_vector()
+    version = manager.get_version()
+    print(f"Read vector: {vector}, version: {version}")
+
+# Create and start multiple threads
+update_thread = threading.Thread(target=update_vector)
+read_thread = threading.Thread(target=read_vector)
+
+update_thread.start()
+read_thread.start()
+
+update_thread.join()
+read_thread.join()
+
+# Final state
+final_vector = manager.get_vector()
+final_version = manager.get_version()
+print(f"Final state - Vector: {final_vector}, Version: {final_version}")
+```
+`ConsistencyManagerWrapper` aims to provide a thread-safe access to an embedding, ensuring consistency when reading and updating the vector in a multi-threaded environment.
+
+**tl;dr** of `ConsistencyManagerWrapper`:
+
+- Maintaining a shared embedding vector in a multi-threaded application,
+- Implementing a versioning system for embeddings that are updated over time,
+- Ensuring atomic updates to an embedding vector in a concurrent environment.
+
+**Note** that the `update()` and `get_vector()` methods return **PyResult**, which means they can potentially raise exceptions
+ (e.g., if a lock can't be acquired within a timeout period).

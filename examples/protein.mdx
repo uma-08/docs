@@ -1,0 +1,201 @@
+---
+title: 'Protein Sequencing '
+description: 'This example can be useful for tasks like protein function prediction, structural similarity analysis, or evolutionary studies.'
+---
+
+
+<Steps>
+<Step title="Install the dependencies ">
+   ```python 
+pipx install incribo biopython bio-embeddings requests matplotlib
+scikit-learn  
+```
+</Step>
+
+<Step title="Import all dependencies ">
+   ```python protein_sequencing.py
+import os
+from incribo import EmbeddingComparator, Embedding, EvaluationWeights
+from Bio import SeqIO
+from bio_embeddings.embed import ProtTransBertBFDEmbedder, ESM1bEmbedder
+from bio_embeddings.extract import SecondaryStructureExtractor, DomainExtractor
+from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
+from sklearn.manifold import TSNE
+import numpy as np
+import matplotlib.pyplot as plt
+import requests
+import logging
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+# Set up logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+```
+</Step>
+
+
+<Step title="Load your Protein Sequencing code">
+   ```python protein_sequencing.py
+# Add your function to load protein sequences from a FASTA file
+def load_sequences(fasta_file):
+    return list(SeqIO.parse(fasta_file, "fasta"))
+
+# Add your function to embed protein sequences
+def embed_sequences(sequences, embedder):
+    embeddings = []
+    for seq in sequences:
+        embedding = embedder.embed(str(seq.seq))
+        embeddings.append(embedding.mean(axis=0))  # Use mean pooling
+    return embeddings
+
+# Add your function to extract secondary structure and domain information
+def extract_bio_info(sequences, ss_extractor, domain_extractor):
+    bio_info = []
+    for seq in sequences:
+        ss = ss_extractor.extract(str(seq.seq))
+        domains = domain_extractor.extract(str(seq.seq))
+        bio_info.append({
+            'secondary_structure': ss,
+            'domains': domains
+        })
+    return bio_info
+
+# Add your function to validate against UniProt database
+def validate_against_uniprot(sequence):
+    url = f"https://www.uniprot.org/uniprot/?query={sequence}&format=tab&columns=id,entry name,protein names,sequence"
+    response = requests.get(url)
+    if response.status_code == 200:
+        lines = response.text.split('\n')
+        if len(lines) > 1:
+            return lines[1].split('\t')
+    return None
+
+# Load protein sequences
+sequences = load_sequences("protein_sequences.fasta")
+```
+</Step>
+
+
+<Step title="Initialize the embedder">
+```python protein_sequencing.py
+
+# Initialize embedders and extractors
+prot_bert_embedder = ProtTransBertBFDEmbedder()
+esm1b_embedder = ESM1bEmbedder()
+ss_extractor = SecondaryStructureExtractor()
+domain_extractor = DomainExtractor()
+
+logger.info("Embedding sequences with ProtTransBertBFD...")
+prot_bert_embeddings = embed_sequences(sequences, prot_bert_embedder)
+
+logger.info("Embedding sequences with ESM1b...")
+esm1b_embeddings = embed_sequences(sequences, esm1b_embedder)
+
+logger.info("Extracting biological information...")
+bio_info = extract_bio_info(sequences, ss_extractor, domain_extractor)
+
+# Combine embeddings and bio info
+combined_embeddings = []
+for pb_emb, esm_emb, bio in zip(prot_bert_embeddings, esm1b_embeddings, bio_info):
+    combined_emb = np.concatenate([
+        pb_emb, 
+        esm_emb, 
+        np.array([bio['secondary_structure'].count(x) for x in 'HEC']),
+        np.array([len(bio['domains'])])
+    ])
+    combined_embeddings.append(combined_emb)
+
+# Initialize EmbeddingComparator
+comparator = EmbeddingComparator(None)
+
+# Add embeddings to the comparator
+for i, emb in enumerate(combined_embeddings):
+    comparator.add_embedding(Embedding(emb.tolist(), f"protein_{i}"))
+
+# Compare embeddings
+comparison_results = comparator.compare()
+logger.info("Embedding Comparison Results:")
+logger.info(comparison_results)
+
+# Get model scores
+model_scores = comparator.get_model_scores()
+logger.info("\nModel Scores:")
+logger.info(model_scores)
+
+# Get the best model (most similar to others)
+best_model = comparator.get_best_model()
+logger.info(f"\nMost central protein: {best_model}")
+
+# Perform clustering
+logger.info("Performing clustering...")
+kmeans = KMeans(n_clusters=5, random_state=42)
+cluster_labels = kmeans.fit_predict(combined_embeddings)
+
+# Perform dimensionality reduction
+logger.info("Performing dimensionality reduction...")
+pca = PCA(n_components=50)
+pca_result = pca.fit_transform(combined_embeddings)
+
+tsne = TSNE(n_components=2, random_state=42)
+tsne_result = tsne.fit_transform(pca_result)
+
+# Plot TSNE results
+plt.figure(figsize=(10, 8))
+scatter = plt.scatter(tsne_result[:, 0], tsne_result[:, 1], c=cluster_labels, cmap='viridis')
+plt.colorbar(scatter)
+plt.title('t-SNE visualization of protein embeddings')
+plt.savefig('protein_embedding_visualization.png')
+plt.close()
+
+logger.info("t-SNE visualization saved as 'protein_embedding_visualization.png'")
+```
+</Step>
+
+
+<Step title="Analyze and recompare">
+```python protein_sequencing.py
+# Validate against UniProt
+logger.info("Validating against UniProt...")
+
+def validate_sequence(seq):
+    uniprot_info = validate_against_uniprot(str(seq.seq))
+    return seq.id, uniprot_info
+
+with ThreadPoolExecutor(max_workers=10) as executor:
+    future_to_seq = {executor.submit(validate_sequence, seq): seq for seq in sequences}
+    for future in as_completed(future_to_seq):
+        seq_id, uniprot_info = future.result()
+        if uniprot_info:
+            logger.info(f"UniProt validation for {seq_id}: {uniprot_info}")
+        else:
+            logger.info(f"No UniProt match found for {seq_id}")
+
+# Analyze pairwise similarities
+for key, value in comparison_results.items():
+    if " vs " in key:
+        logger.info(f"\nSimilarity between {key}: {value}")
+        protein1, protein2 = key.split(" vs ")
+        seq1 = next(seq for seq in sequences if seq.id == protein1.split("_")[1])
+        seq2 = next(seq for seq in sequences if seq.id == protein2.split("_")[1])
+        logger.info(f"Protein 1: {seq1.description}")
+        logger.info(f"Protein 2: {seq2.description}")
+        logger.info(f"Cluster labels: {cluster_labels[int(protein1.split('_')[1])]} vs {cluster_labels[int(protein2.split('_')[1])]}")
+```
+</Step>
+
+
+<Step title="Optional: Add custom weights and recompare">
+```python protein_sequencing.py
+custom_weights = EvaluationWeights(0.4, 0.3, 0.2, 0.1)
+comparator.set_weights(custom_weights)
+
+# Recompare with custom weights
+new_comparison_results = comparator.compare()
+logger.info("\nNew Comparison Results with Custom Weights:")
+logger.info(new_comparison_results)
+```
+</Step>
+
+
+</Steps>

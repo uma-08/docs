@@ -1,0 +1,63 @@
+---
+title: 'Embedding Comparator'
+description: '`EmbeddingComparator` provides a comprehensive way to compare and evaluate multiple embeddings.'
+---
+
+An example with **HuggingFace** would look like:
+```python embeddings_comparator.py
+import incribo
+from sentence_transformers import SentenceTransformer
+
+def embedding_comparator_with_hf_models():
+    print("Loading Hugging Face models")
+    model1 = SentenceTransformer('all-MiniLM-L6-v2')
+    model2 = SentenceTransformer('paraphrase-MiniLM-L3-v2')
+
+    # Random test string
+    test_string = (
+        "The quick brown fox jumps over the lazy dog. "
+        "This sentence contains every letter of the alphabet."
+    )
+
+    print("Generating embeddings")
+    embedding1 = model1.encode(test_string)
+    embedding2 = model2.encode(test_string)
+
+    print(f"Embedding 1 shape: {embedding1.shape}")
+    print(f"Embedding 2 shape: {embedding2.shape}")
+
+    print("Creating Incribo EmbeddingComparator")
+    comparator = incribo.EmbeddingComparator()
+
+    print("Adding embeddings to comparator")
+    comparator.add_embedding(
+        incribo.Embedding(embedding1.tolist(), "all-MiniLM-L6-v2")
+    )
+    comparator.add_embedding(
+        incribo.Embedding(embedding2.tolist(), "paraphrase-MiniLM-L3-v2")
+    )
+
+    print("Comparing embeddings")
+    results = comparator.compare()
+    print(f"Comparison results: {results}")
+
+    print("Getting best model")
+    best_model = comparator.get_best_model()
+    print(f"Best model: {best_model}")
+
+    assert best_model is not None, "Best model should not be None"
+    assert best_model in [
+        "all-MiniLM-L6-v2",
+        "paraphrase-MiniLM-L3-v2"
+    ], "Best model should be one of the added models"
+
+if __name__ == "__main__":
+    embedding_comparator_with_hf_models()
+```
+`EmbeddingComparator` uses metrics internally such as:
+* L2 Norm: Measures the magnitude of the embedding vectors.
+* Cosine Similarity: Measures the similarity between embedding vectors.
+* Sparsity: Evaluates how sparse (containing many zeros) the embeddings are.
+* Dimensionality: Considers the dimensionality of the embeddings.
+
+Use the `EmbeddingComparator` component to assess embedding quality, allowing you to customize various metrics based on your specific needs and use cases.
