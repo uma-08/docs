@@ -5,15 +5,15 @@
     "name": "Documentation"
 },
   "logo": {
-    "dark": "/logo/3.svg",
-    "light": "/logo/3.svg",
+    "dark": "https://github.com/uma-08/docs/blob/e604cabbc3d94e1b495d60076ba7bf238a8cad21/logo/3.svg",
+    "light": "https://github.com/uma-08/docs/blob/e604cabbc3d94e1b495d60076ba7bf238a8cad21/logo/3.svg",
     "href": "https://www.incribo.com/"
   },
-  "favicon": "/logo/3.svg",
+  "favicon": "https://github.com/uma-08/docs/blob/e604cabbc3d94e1b495d60076ba7bf238a8cad21/logo/3.svg",
   "colors": {
-    "primary": "#00A8E8",
-    "light": "#00A8E8",
-    "dark": "#00A8E8",
+    "primary": "#000",
+    "light": "#00a8e8",
+    "dark": "#00a8e8",
     "anchors": {
       "from": "#000",
       "to": "#000"
@@ -96,4 +96,3 @@
     "linkedin": "https://www.linkedin.com/company/incribo/"
   }
 }
-
