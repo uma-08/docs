@@ -5,11 +5,11 @@
     "name": "Documentation"
 },
   "logo": {
-    "dark": "logo/3.svg",
-    "light": "logo/3.svg",
+    "dark": "/logo/3.svg",
+    "light": "/logo/3.svg",
     "href": "https://www.incribo.com/"
   },
-  "favicon": "logo/3.svg",
+  "favicon": "/logo/3.svg",
   "colors": {
     "primary": "#000",
     "light": "#00a8e8",
