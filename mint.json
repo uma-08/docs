@@ -5,11 +5,11 @@
     "name": "Documentation"
 },
   "logo": {
-    "dark": "https://raw.githubusercontent.com/uma-08/docs/main/logo/3.svg",
-    "light": "https://raw.githubusercontent.com/uma-08/docs/main/logo/3.svg",
+    "dark": "logo/3.svg",
+    "light": "logo/3.svg",
     "href": "https://www.incribo.com/"
   },
-  "favicon": "https://raw.githubusercontent.com/uma-08/docs/main/logo/3.svg",
+  "favicon": "logo/3.svg",
   "colors": {
     "primary": "#000",
     "light": "#00a8e8",
