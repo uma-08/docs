@@ -78,14 +78,9 @@
       "pages": [
         "essentials/branch_manager", 
         "essentials/consistency_manager", 
-        "essentials/drift_manager", 
         "essentials/dynamic_em", 
-        "essentials/emb_compare", 
-        "essentials/emb_streamer", 
-        "essentials/embedding", 
-        "essentials/eval_weights", 
-        "essentials/history_tracker", 
-        "essentials/update_counter", 
+        "essentials/embedding",  
+        "essentials/history_tracker",
         "essentials/version_control"
        ]
     }
