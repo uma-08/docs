@@ -22,7 +22,7 @@
   "topbarLinks": [
     {
       "name": "Community",
-      "url": "mailto"
+      "url": "https://discord.gg/fKBpCb8f"
     },
     {
       "name": "Contact",
@@ -53,7 +53,7 @@
     {
       "name": "Community",
       "icon": "discord",
-      "url": "https://incribo.com/community"
+      "url": "https://discord.gg/fKBpCb8f"
     }
   ],
   "navigation": [
