@@ -60,16 +60,7 @@
     {
       "group": "Start Here",
       "pages": [ 
-        "quickstart",
-        {
-          "group": "Examples",
-          "pages": [
-            "examples/multi",
-            "examples/credit",
-            "examples/protein",
-            "examples/rag"
-          ]
-      }
+        "quickstart"
       ]
       
     },
